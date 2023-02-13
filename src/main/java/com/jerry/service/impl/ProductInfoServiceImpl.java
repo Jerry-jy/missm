@@ -23,7 +23,8 @@ import java.util.List;
 @Service
 public class ProductInfoServiceImpl implements ProductInfoService {
 
-   @Autowired
+    //在业务层一定有数据访问层的对象
+    @Autowired
     ProductInfoMapper productInfoMapper;
 
     @Override
@@ -51,5 +52,10 @@ public class ProductInfoServiceImpl implements ProductInfoService {
         //4、将倒序排的集合，封装为PageInfo
         PageInfo<ProductInfo> pageInfo = new PageInfo<>(list);
         return pageInfo;
+    }
+
+    @Override
+    public int save(ProductInfo info) {
+        return productInfoMapper.insert(info);
     }
 }

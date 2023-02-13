@@ -21,4 +21,7 @@ public interface ProductInfoService {
     //商品分页显示
     //使用mybits提供的插件，返回值是PageInfo，形参传入（当前页，每页显示条数）
     PageInfo splitPage(int pageNum, int pageSize);
+
+    //新增商品
+    int save(ProductInfo info);
 }
