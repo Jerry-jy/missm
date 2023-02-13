@@ -58,4 +58,14 @@ public class ProductInfoServiceImpl implements ProductInfoService {
     public int save(ProductInfo info) {
         return productInfoMapper.insert(info);
     }
+
+    @Override
+    public ProductInfo selectById(int pid) {
+        return productInfoMapper.selectByPrimaryKey(pid);
+    }
+
+    @Override
+    public int update(ProductInfo info) {
+        return productInfoMapper.updateByPrimaryKey(info);
+    }
 }

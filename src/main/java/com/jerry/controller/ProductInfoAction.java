@@ -7,6 +7,7 @@ import com.jerry.utils.FileNameUtil;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
@@ -96,20 +97,62 @@ public class ProductInfoAction {
         info.setpImage(saveFileName);
         info.setpDate(new Date());
 
-        int num=-1;
+        int num = -1;
         try {
-            num=productInfoService.save(info);
+            num = productInfoService.save(info);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
-        if (num>0){
+        if (num > 0) {
             request.setAttribute("msg", "增加成功");
-        }else {
+        } else {
             request.setAttribute("msg", "增加失败");
         }
 
+        //清空saveFileName这个变量，为了下次新增或修改的异步Ajax的上传处理
+        saveFileName = "";
         //增加成功后应该重新访问数据库，所以跳转到分页显示的action上
+        return "forward:/prod/split.action";
+    }
+
+    //根据主键id查询商品
+    @RequestMapping("/one")
+    public String one(int pid, Model model) {
+
+        ProductInfo info = productInfoService.selectById(pid);
+        model.addAttribute("prod", info);
+        return "update";
+    }
+
+    //更新商品
+    @RequestMapping("/update")
+    public String update(ProductInfo info, HttpServletRequest request) {
+        //1、因为Ajax的异步图片上传，如果有上传过，则 saveFileName 里有上传过来的名称，
+        //如果没有使用异步Ajax上传过图片，则saveFileName=""，则实体类使用隐藏表单域提供上来的pImage原始图片的名称；
+        if (!saveFileName.equals("")) {
+            info.setpImage(saveFileName);
+        }
+        //完成更新处理
+        int num = -1;
+        //切记：对于增删改的操作，一定要进行try-catch的异常捕获
+        try {
+            num = productInfoService.update(info);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        if (num>0){
+            //更新成功
+            request.setAttribute("msg", "更新成功");
+        }else {
+            //更新失败
+            request.setAttribute("msg", "更新失败");
+        }
+
+        //处理完更新后，saveFileName里可能有数据
+        //而下一次使用这个变量作为判断的依据，就会出错，所以必须清空saveFileName
+        saveFileName = "";
+        //redirect会导致request请求丢失，改用forward
         return "forward:/prod/split.action";
     }
 }

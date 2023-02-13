@@ -24,4 +24,10 @@ public interface ProductInfoService {
 
     //新增商品
     int save(ProductInfo info);
+
+    //按主键id查询商品
+    ProductInfo selectById(int pid);
+
+    //更新商品
+    int update(ProductInfo info);
 }
