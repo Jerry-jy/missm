@@ -155,4 +155,32 @@ public class ProductInfoAction {
         //redirect会导致request请求丢失，改用forward
         return "forward:/prod/split.action";
     }
+
+    //删除商品
+    @RequestMapping("/delete")
+    public String delete(int pid,HttpServletRequest request){
+        int num=-1;
+
+        try {
+            num=productInfoService.delete(pid);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        if (num>0){
+            request.setAttribute("msg", "删除成功");
+        }else {
+            request.setAttribute("msg", "删除失败");
+        }
+
+        return "forward:/prod/deleteAjaxSplit.action";
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "deleteAjaxSplit",produces = "text/html;charset=UTF-8")
+    public Object deleteAjaxSplit(HttpServletRequest request){
+        //取第一页的数据
+        PageInfo info = productInfoService.splitPage(1, PAGE_SIZE);
+        request.getSession().setAttribute("info", info);
+        return request.getAttribute("msg");
+    }
 }

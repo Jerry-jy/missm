@@ -209,7 +209,17 @@ alert(str+"11111111");
     function del(pid) {
         if (confirm("确定删除吗")) {
           //向服务器提交请求完成删除
-            window.location="${pageContext.request.contextPath}/prod/delete.action?pid="+pid;
+          <%--  window.location="${pageContext.request.contextPath}/prod/delete.action?pid="+pid;--%>
+            $.ajax({
+                url: "${pageContext.request.contextPath}/prod/delete.action",
+                data: {"pid":pid},
+                type: "post",
+                dataType:"text",
+                success:function (msg){
+                    alert(msg);
+                    $("#table").load("http://localhost:8080/admin/product.jsp #table");
+                }
+            });
         }
     }
 
