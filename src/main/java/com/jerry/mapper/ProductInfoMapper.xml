@@ -102,7 +102,13 @@
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.jerry.pojo.ProductInfo" >
+    <delete id="deleteBatch">
+      delete from product_info where p_id in
+                               <foreach collection="array" item="pid" separator="," open="(" close=")">
+                                 #{pid}
+                               </foreach>
+    </delete>
+    <insert id="insert" parameterType="com.jerry.pojo.ProductInfo" >
     insert into product_info (p_id, p_name, p_content, 
       p_price, p_image, p_number, 
       type_id, p_date)

@@ -141,10 +141,10 @@ public class ProductInfoAction {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        if (num>0){
+        if (num > 0) {
             //更新成功
             request.setAttribute("msg", "更新成功");
-        }else {
+        } else {
             //更新失败
             request.setAttribute("msg", "更新失败");
         }
@@ -156,19 +156,19 @@ public class ProductInfoAction {
         return "forward:/prod/split.action";
     }
 
-    //删除商品
+    //单个删除
     @RequestMapping("/delete")
-    public String delete(int pid,HttpServletRequest request){
-        int num=-1;
+    public String delete(int pid, HttpServletRequest request) {
+        int num = -1;
 
         try {
-            num=productInfoService.delete(pid);
+            num = productInfoService.delete(pid);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        if (num>0){
+        if (num > 0) {
             request.setAttribute("msg", "删除成功");
-        }else {
+        } else {
             request.setAttribute("msg", "删除失败");
         }
 
@@ -176,11 +176,35 @@ public class ProductInfoAction {
     }
 
     @ResponseBody
-    @RequestMapping(value = "deleteAjaxSplit",produces = "text/html;charset=UTF-8")
-    public Object deleteAjaxSplit(HttpServletRequest request){
+    @RequestMapping(value = "deleteAjaxSplit", produces = "text/html;charset=UTF-8")
+    public Object deleteAjaxSplit(HttpServletRequest request) {
         //取第一页的数据
         PageInfo info = productInfoService.splitPage(1, PAGE_SIZE);
         request.getSession().setAttribute("info", info);
         return request.getAttribute("msg");
+    }
+
+    //批量删除商品
+    @RequestMapping("/deleteBatch")
+    public String deleteBatch(String pids, HttpServletRequest request) {
+        //将上传上来的字符串截断开，形成商品id的字符数组
+        String[] split = pids.split(",");
+        int num = -1;
+        try {
+            num = productInfoService.deleteBatch(split);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            if (num > 0){
+                request.setAttribute("msg", "批量删除成功");
+            }else {
+                request.setAttribute("msg", "批量删除失败");
+            }
+        } catch (Exception e) {
+            request.setAttribute("msg", "商品不能删除");
+        }
+
+        return "forward:/prod/deleteAjaxSplit.action";
     }
 }

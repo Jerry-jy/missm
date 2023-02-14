@@ -36,7 +36,7 @@
     function ckClick() {
         //取得所有name=ck的被选中的复选框
         var length=$("input[name=ck]:checked").length;
-//取得所有name=ck的复选框
+        //取得所有name=ck的复选框
         var len=$("input[name=ck]").length;
         //比较
         if(len == length){
@@ -180,30 +180,41 @@
 
     //批量删除
     function deleteBatch() {
-
-            //取得所有被选中删除商品的pid
-            var zhi=$("input[name=ck]:checked");
-            var str="";
-            var id="";
-            if(zhi.length==0){
-                alert("请选择将要删除的商品！");
-            }else{
-                // 有选中的商品，则取出每个选 中商品的ID，拼提交的ID的数据
-                if(confirm("您确定删除"+zhi.length+"条商品吗？")){
+        //取得所有被选中复选框的删除商品的pid
+        var cks = $("input[name='ck']:checked");
+        var str = "";
+        var id = "";
+        if (cks.length == 0) {//没有选中商品
+            alert("请选择将要删除的商品！");
+        } else {
+            // 有选中的商品，则取出每个选 中商品的ID，拼提交的ID的数据
+            if (confirm("您确定删除" + cks.length + "条商品吗？")) {
+                alert("可以进行删除");
                 //拼接ID
-                    $.each(zhi,function (index,item) {
-
-                        id=$(item).val(); //22 33
-                        alert(id);
-                        if(id!=null)
-                            str += id+",";  //22,33,44
-                    });
-alert(str+"11111111");
-                    //发送请求到服务器端
-                   // window.location="${pageContext.request.contextPath}/prod/deletebatch.action?str="+str;
-
-                }
+                $.each(cks, function (index, item) {
+                    //进行提交商品 id的字符串的拼接
+                    id = $(item).val(); //每一个被选中的商品id 22 33
+                    //alert(id);
+                    //进行非空判断,避免出错
+                    if (id != null) {
+                        str += id + ",";  //22,33,44,
+                    }
+                });
+                //发送 ajax请求,进行批量删除的提交
+                $.ajax({
+                    url: "${pageContext.request.contextPath}/prod/deleteBatch.action",
+                    data: {"pids": str},
+                    type: "post",
+                    dataType: "text",
+                    success: function (msg) {
+                        alert(msg);//批量删除成功!失败!不可删除
+                        //将页面上显示商品数据的容器重新加载
+                        $("#table").load("${pageContext.request.contextPath}/admin/product.jsp #table");
+                    }
+                });
+            }
         }
+
     }
     //单个删除
     function del(pid) {
