@@ -196,7 +196,7 @@
                 and p_name like '%${pname}%'
             </if>
             <!--商品类型不为空,拼接商品类型查询-->
-            <if test="typeid != null and typeid != ''">
+            <if test="typeid != null and typeid != -1">
                 and type_id = #{typeid}
             </if>
             <!--如果最低价格不为空 且大于0(vo在类中实现),最高价格为空,则查询大于最低价格的所有商品-->

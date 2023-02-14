@@ -2,6 +2,7 @@ package com.jerry.service;
 
 import com.github.pagehelper.PageInfo;
 import com.jerry.pojo.ProductInfo;
+import com.jerry.pojo.vo.ProductInfoVo;
 
 import java.util.List;
 
@@ -36,4 +37,10 @@ public interface ProductInfoService {
 
     //批量删除商品
     int deleteBatch(String []ids);
+
+    //多条件商品的查询
+    List<ProductInfo> selectCondition(ProductInfoVo vo);
+
+    //多条件商品的查询 分页
+    PageInfo<ProductInfo> splitPageVo(ProductInfoVo vo, int pageSize);
 }

@@ -26,24 +26,23 @@
 <script type="text/javascript">
     function allClick() {
         //取得全选复选框的选中未选 中状态
-        var ischeck=$("#all").prop("checked");
+        var ischeck = $("#all").prop("checked");
         //将此状态赋值给每个商品列表里的复选框
         $("input[name=ck]").each(function () {
-            this.checked=ischeck;
+            this.checked = ischeck;
         });
     }
 
     function ckClick() {
         //取得所有name=ck的被选中的复选框
-        var length=$("input[name=ck]:checked").length;
+        var length = $("input[name=ck]:checked").length;
         //取得所有name=ck的复选框
-        var len=$("input[name=ck]").length;
+        var len = $("input[name=ck]").length;
         //比较
-        if(len == length){
-            $("#all").prop("checked",true);
-        }else
-        {
-            $("#all").prop("checked",false);
+        if (len == length) {
+            $("#all").prop("checked", true);
+        } else {
+            $("#all").prop("checked", false);
         }
     }
 </script>
@@ -57,12 +56,12 @@
             商品名称：<input name="pname" id="pname">&nbsp;&nbsp;&nbsp;
             商品类型：<select name="typeid" id="typeid">
             <option value="-1">请选择</option>
-            <c:forEach items="${ptlist}" var="pt">
+            <c:forEach items="${typeList}" var="pt">
                 <option value="${pt.typeId}">${pt.typeName}</option>
             </c:forEach>
         </select>&nbsp;&nbsp;&nbsp;
             价格：<input name="lprice" id="lprice">-<input name="hprice" id="hprice">
-            <input type="button" value="查询" onclick="ajaxsplit(${info.pageNum})">
+            <input type="button" value="查询" onclick="condition(${info.pageNum})">
         </form>
     </div>
     <br>
@@ -95,7 +94,8 @@
                         </tr>
                         <c:forEach items="${info.list}" var="p">
                             <tr>
-                                <td valign="center" align="center"><input type="checkbox" name="ck" id="ck" value="${p.pId}" onclick="ckClick()"></td>
+                                <td valign="center" align="center"><input type="checkbox" name="ck" id="ck"
+                                                                          value="${p.pId}" onclick="ckClick()"></td>
                                 <td>${p.pName}</td>
                                 <td>${p.pContent}</td>
                                 <td>${p.pPrice}</td>
@@ -109,7 +109,7 @@
                                             onclick="one(${p.pId},${info.pageNum})">编辑
                                     </button>
                                     <button type="button" class="btn btn-warning" id="mydel"
-                                            onclick="del(${p.pId})">删除
+                                            onclick="del(${p.pId},${info.pageNum})">删除
                                     </button>
                                 </td>
                             </tr>
@@ -142,7 +142,7 @@
                                         </c:if>
                                     </c:forEach>
                                     <li>
-                                        <%--  <a href="${pageContext.request.contextPath}/prod/split.action?page=1" aria-label="Next">--%>
+                                            <%--  <a href="${pageContext.request.contextPath}/prod/split.action?page=1" aria-label="Next">--%>
                                         <a href="javascript:ajaxsplit(${info.nextPage})" aria-label="Next">
                                             <span aria-hidden="true">»</span></a>
                                     </li>
@@ -165,7 +165,8 @@
             </c:when>
             <c:otherwise>
                 <div>
-                    <h2 style="width:1200px; text-align: center;color: orangered;margin-top: 100px">暂时没有符合条件的商品！</h2>
+                    <h2 style="width:1200px; text-align: center;color: orangered;margin-top: 100px">
+                        暂时没有符合条件的商品！</h2>
                 </div>
             </c:otherwise>
         </c:choose>
@@ -189,7 +190,12 @@
         } else {
             // 有选中的商品，则取出每个选 中商品的ID，拼提交的ID的数据
             if (confirm("您确定删除" + cks.length + "条商品吗？")) {
-                alert("可以进行删除");
+                // alert("可以进行删除");
+                //取出查询条件
+                var pname = $("#pname").val();
+                var typeid = $("#typeid").val();
+                var lprice = $("#lprice").val();
+                var hprice = $("#hprice").val();
                 //拼接ID
                 $.each(cks, function (index, item) {
                     //进行提交商品 id的字符串的拼接
@@ -216,37 +222,81 @@
         }
 
     }
+
     //单个删除
-    function del(pid) {
+    function del(pid,page) {
         if (confirm("确定删除吗")) {
-          //向服务器提交请求完成删除
-          <%--  window.location="${pageContext.request.contextPath}/prod/delete.action?pid="+pid;--%>
+            //取出查询条件
+            var pname = $("#pname").val();
+            var typeid = $("#typeid").val();
+            var lprice = $("#lprice").val();
+            var hprice = $("#hprice").val();
+
+            //向服务器提交请求完成删除
+            <%--  window.location="${pageContext.request.contextPath}/prod/delete.action?pid="+pid;--%>
             $.ajax({
                 url: "${pageContext.request.contextPath}/prod/delete.action",
-                data: {"pid":pid},
+                data: {"pid": pid, "pname": pname, "typeid": typeid, "lprice": lprice, "hprice": hprice, "page": page},
                 type: "post",
-                dataType:"text",
-                success:function (msg){
+                dataType: "text",
+                success: function (msg) {
                     alert(msg);
-                    $("#table").load("http://localhost:8080/admin/product.jsp #table");
+                    $("#table").load("${pageContext.request.contextPath}/admin/product.jsp #table")
                 }
             });
         }
     }
 
-    function one(pid, ispage) {
-        location.href = "${pageContext.request.contextPath}/prod/one.action?pid=" + pid + "&page=" + ispage;
+    //查询条件 异步ajax 发送到 服务器
+    function condition() {
+        //取出查询条件
+        var pname = $("#pname").val();
+        var typeid = $("#typeid").val();
+        var lprice = $("#lprice").val();
+        var hprice = $("#hprice").val();
+        $.ajax({
+            type: "post",
+            url: "${pageContext.request.contextPath}/prod/ajaxSplit.action",///prod/condition.action
+            data: {"pname": pname, "typeid": typeid, "lprice": lprice, "hprice": hprice},
+            success: function () {
+                //刷新数据
+                // $("#table").load("http://localhost:8080/admin/product.jsp #table");
+                $("#table").load("${pageContext.request.contextPath}/admin/product.jsp #table");
+            }
+        })
     }
-</script>
-<!--分页的AJAX实现-->
-<script type="text/javascript">
+
+    function one(pid, page) {
+        <%--location.href = "${pageContext.request.contextPath}/prod/one.action?pid=" + pid + "&page=" + ispage;--%>
+        //取出查询条件
+        var pname = $("#pname").val();
+        var typeid = $("#typeid").val();
+
+        var lprice = $("#lprice").val();
+        var hprice = $("#hprice").val();
+        //向服务器提交请求,传递商品  //?key=value&key=value
+        var str = "?pid=" + pid + "&pname=" + pname + "&typeid=" + typeid + "&lprice=" + lprice + "&hprice=" + hprice + "&page=" + page;
+        //alert(str);
+        // http://localhost/prod/one.action?pid=6&pname=&typeid=2&lprice=undefined&hprice=&page=1
+        location.href = "${pageContext.request.contextPath}/prod/one.action" + str;
+    }
+
+    <!--分页的AJAX实现-->
     function ajaxsplit(page) {
+        //取出查询条件
+        var pname = $("#pname").val();
+        var typeid = $("#typeid").val();
+        var lprice = $("#lprice").val();
+        var hprice = $("#hprice").val();
+
+        //向服务发出 ajax请求,请示 page页中的所有数据,在当前页面上局部刷新
         //异步ajax分页请求
         $.ajax({
-        url:"${pageContext.request.contextPath}/prod/ajaxSplit.action",
-            data:{"page":page},
-            type:"post",
-            success:function () {
+            url: "${pageContext.request.contextPath}/prod/ajaxSplit.action",
+            //将所有条件也带上去
+            data: {"page": page, "pname": pname, "typeid": typeid, "lprice": lprice, "hprice": hprice},
+            type: "post",
+            success: function () {
                 //重新加载分页显示的组件table
                 //location.href---->http://localhost:8080/admin/login.action
                 $("#table").load("http://localhost:8080/admin/product.jsp #table");
